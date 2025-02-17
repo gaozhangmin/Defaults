@@ -273,7 +273,10 @@ extension Defaults {
 			observation.start(options: initial ? [.initial] : [])
 
 			continuation.onTermination = { _ in
-				observation.invalidate()
+				// `invalidate()` should be thread-safe, but it is not in practice.
+				DispatchQueue.main.async {
+					observation.invalidate()
+				}
 			}
 		}
 	}
@@ -311,8 +314,11 @@ extension Defaults {
 			}
 
 			continuation.onTermination = { _ in
-				for observation in observations {
-					observation.invalidate()
+				// `invalidate()` should be thread-safe, but it is not in practice.
+				DispatchQueue.main.async {
+					for observation in observations {
+						observation.invalidate()
+					}
 				}
 			}
 		}
